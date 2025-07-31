@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生档案模板生成器</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --header-bg: #2c3e50;
+            --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background-color: #eef2f7;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        
+        header {
+            background: var(--header-bg);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            padding: 25px;
+        }
+        
+        .config-section {
+            background: var(--light-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .config-section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--header-bg);
+            display: flex;
+            align-items: center;
+        }
+        
+        .config-section h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--primary-color);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+        
+        .config-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .input-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .input-group input, 
+        .input-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .input-group input:focus, 
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .input-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .data-input-section {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .data-column {
+            flex: 1;
+            min-width: 300px;
+            background: var(--light-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .data-column h3 {
+            background: #f0f4f8;
+            padding: 12px 15px;
+            font-size: 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--header-bg);
+        }
+        
+        .data-column textarea {
+            width: 100%;
+            height: 250px;
+            padding: 15px;
+            border: none;
+            resize: none;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .data-column textarea:focus {
+            outline: none;
+        }
+        
+        .status-bar {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--border-color);
+        }
+        
+        .status-message {
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-message.success {
+            color: var(--success-color);
+        }
+        
+        .status-message.warning {
+            color: var(--warning-color);
+        }
+        
+        .status-message.error {
+            color: var(--error-color);
+        }
+        
+        .status-icon {
+            font-size: 18px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .divider {
+            height: 30px;
+            width: 1px;
+            background: #ced4da;
+            margin: 0 15px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 14px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .data-input-section {
+                flex-direction: column;
+            }
+            
+            .config-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>学生档案模板生成器</h1>
+            <p>输入学生信息，自动生成档案模板Excel文件</p>
+        </header>
+        
+        <div class="main-content">
+            <section class="config-section">
+                <h2>信息设置</h2>
+                <div class="config-row">
+                    <div class="input-group">
+                        <label for="year">年份</label>
+                        <input type="text" id="year" value="2025">
+                        <div class="input-hint">例如: 2025</div>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="input-group">
+                        <label for="degree">学位类型</label>
+                        <select id="degree">
+                            <option value="硕士">硕士</option>
+                            <option value="博士">博士</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="data-input-section">
+                <div class="data-column">
+                    <h3>学生姓名列表</h3>
+                    <textarea id="names" placeholder="每行输入一个学生姓名&#10;例如：&#10;张三&#10;李四&#10;王五"></textarea>
+                </div>
+                
+                <div class="data-column">
+                    <h3>论文题目列表</h3>
+                    <textarea id="topics" placeholder="每行输入一个论文题目&#10;例如：&#10;人工智能在教育领域的应用研究&#10;区块链技术在金融安全中的实践分析&#10;量子计算对密码学的影响评估"></textarea>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <div id="status" class="status-message">
+                    <span class="status-icon">ⓘ</span>
+                    <span>请输入学生姓名和论文题目</span>
+                </div>
+                <div>
+                    <span id="count-display">姓名: 0 | 题目: 0</span>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button id="generate-btn" class="btn btn-primary" disabled>
+                    <span>📋</span> 生成模板
+                </button>
+                <button id="clear-btn" class="btn btn-secondary">
+                    <span>🗑️</span> 清空内容
+                </button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>提示：请确保学生姓名和论文题目的数量一致</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const yearInput = document.getElementById('year');
+            const degreeSelect = document.getElementById('degree');
+            const namesTextarea = document.getElementById('names');
+            const topicsTextarea = document.getElementById('topics');
+            const statusDisplay = document.getElementById('status');
+            const countDisplay = document.getElementById('count-display');
+            const generateBtn = document.getElementById('generate-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            
+            // 固定标题列表
+            const fixedTitles = [
+                "注册卡片", "培养计划", "开题报告", "开题报告评议结果", 
+                "论文答辩申请材料", "学位申请书", "毕业登记表", 
+                "学位论文答辩情况表", "学位评定委员会决议", 
+                "颁发学位证明书", "指导老师评阅书", "论文评阅书1", 
+                "论文评阅书2", "表决票", "答辩记录", "成绩单"
+            ];
+            
+            // 更新状态
+            function updateStatus() {
+                const names = getNames();
+                const topics = getTopics();
+                const namesCount = names.length;
+                const topicsCount = topics.length;
+                
+                // 更新计数显示
+                countDisplay.textContent = `姓名: ${namesCount} | 题目: ${topicsCount}`;
+                
+                // 更新状态消息
+                if (namesCount === 0 && topicsCount === 0) {
+                    setStatus("请输入学生姓名和论文题目", "info");
+                    generateBtn.disabled = true;
+                } else if (namesCount !== topicsCount) {
+                    setStatus(`数据不匹配: 姓名(${namesCount}) ≠ 题目(${topicsCount})`, "error");
+                    generateBtn.disabled = true;
+                } else {
+                    setStatus(`数据匹配: 姓名(${namesCount}) = 题目(${topicsCount})`, "success");
+                    generateBtn.disabled = false;
+                }
+            }
+            
+            // 设置状态消息
+            function setStatus(message, type) {
+                statusDisplay.className = "status-message";
+                statusDisplay.innerHTML = `<span class="status-icon">${getStatusIcon(type)}</span><span>${message}</span>`;
+                
+                switch(type) {
+                    case "success":
+                        statusDisplay.classList.add("success");
+                        break;
+                    case "error":
+                        statusDisplay.classList.add("error");
+                        break;
+                    case "warning":
+                        statusDisplay.classList.add("warning");
+                        break;
+                }
+            }
+            
+            // 获取状态图标
+            function getStatusIcon(type) {
+                switch(type) {
+                    case "success": return "✓";
+                    case "error": return "⚠";
+                    case "warning": return "⚠";
+                    default: return "ⓘ";
+                }
+            }
+            
+            // 获取姓名列表
+            function getNames() {
+                return namesTextarea.value.split('\n')
+                    .map(name => name.trim())
+                    .filter(name => name !== '');
+            }
+            
+            // 获取题目列表
+            function getTopics() {
+                return topicsTextarea.value.split('\n')
+                    .map(topic => topic.trim())
+                    .filter(topic => topic !== '');
+            }
+            
+            // 清空内容
+            function clearContent() {
+                namesTextarea.value = '';
+                topicsTextarea.value = '';
+                updateStatus();
+            }
+            
+            // 生成Excel模板
+            function generateTemplate() {
+                try {
+                    const names = getNames();
+                    const topics = getTopics();
+                    const year = yearInput.value;
+                    const degree = degreeSelect.value;
+                    const numStudents = names.length;
+                    
+                    // 验证年份
+                    if (!/^\d{4}$/.test(year)) {
+                        setStatus("错误: 年份必须是4位数字", "error");
+                        return;
+                    }
+                    
+                    // 创建模板数据
+                    const data = [];
+                    let caseNumber = 1;  // 案卷/盒号
+                    
+                    // 添加标题行
+                    const headers = [
+                        "信息分类号", "档案馆室代号", "全宗号", "缩微号", "实体分类号", 
+                        "案卷/盒号", "馆编件号", "保管期", "密级", "正题名", "副题名", 
+                        "附注", "责任者", "合作者", "页数", "规格", "时间", "单位", 
+                        "存址", "主题词", "出版项", "获奖项", "获奖等级", "获奖时间", 
+                        "文号", "载体", "文本", "归档份数", "附件", "输入员", "全文"
+                    ];
+                    data.push(headers);
+                    
+                    // 添加说明行
+                    const note = "1.请避免档号重复2.用作类目的著录项不可超过50字符3.信息分类号：100字符以内；档案馆室代号：255字符以内；全宗号：100字符以内；缩微号：255字符以内；实体分类号：100字符以内；案卷/盒号：-2,147,483,648~2,147,483,647内的整数；馆编件号：-2,147,483,648~2,147,483,647内的整数；保管期：永久，长期，短期，15年，定期(30年)，定期(10年)，30年；密级：秘密/机密，内部，公开；正题名：1500字符以内；副题名：2000字符以内；附注：2147483647字符以内；责任者：500字符以内；合作者：255字符以内；页数：100字符以内；规格：10字符以内；时间：255字符以内；单位：255字符以内；存址：255字符以内；主题词：1000字符以内；出版项：255字符以内；获奖项：255字符以内；获奖等级：255字符以内；获奖时间：255字符以内；文号：500字符以内；载体：255字符以内；文本：10字符以内；归档份数：10字符以内；附件：2147483647字符以内；输入员：255字符以内；全文：2147483647字符以内；";
+                    const noteRow = Array(31).fill('').map((_, i) => i === 0 ? note : '');
+                    data.push(noteRow);
+                    
+                    // 为每个学生生成数据
+                    for (let i = 0; i < names.length; i++) {
+                        const name = names[i];
+                        const topic = topics[i];
+                        
+                        // 每个学生18条记录
+                        for (let j = 0; j < 18; j++) {
+                            const row = Array(31).fill(null);
+                            
+                            // 设置固定值
+                            row[4] = year;  // 实体分类号
+                            row[5] = caseNumber;  // 案卷/盒号
+                            row[6] = j === 0 ? null : j;  // 馆编件号
+                            row[12] = name;  // 责任者
+                            
+                            // 设置正题名
+                            if (j === 0) {
+                                row[9] = `${name}${degree}生档案`;
+                            } else if (j === 1) {
+                                row[9] = topic;
+                            } else {
+                                row[9] = `${name}${fixedTitles[j-2]}`;
+                            }
+                            
+                            data.push(row);
+                        }
+                        
+                        caseNumber++;
+                    }
+                    
+                    // 创建工作簿
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.aoa_to_sheet(data);
+                    
+                    // 设置列宽
+                    const colWidths = Array(headers.length).fill(20);
+                    ws['!cols'] = colWidths.map(w => ({ width: w }));
+                    
+                    // 添加工作表
+                    XLSX.utils.book_append_sheet(wb, ws, "模板");
+                    
+                    // 生成文件名
+                    const fileName = `学生档案模板_${year}_${degree}_${numStudents}人.xlsx`;
+                    
+                    // 导出文件
+                    XLSX.writeFile(wb, fileName);
+                    
+                    setStatus(`模板已生成: ${fileName}`, "success");
+                    
+                } catch (error) {
+                    setStatus(`生成模板时出错: ${error.message}`, "error");
+                    console.error(error);
+                }
+            }
+            
+            // 绑定事件
+            namesTextarea.addEventListener('input', updateStatus);
+            topicsTextarea.addEventListener('input', updateStatus);
+            generateBtn.addEventListener('click', generateTemplate);
+            clearBtn.addEventListener('click', clearContent);
+            
+            // 初始化
+            updateStatus();
+        });
+    </script>
+</body>
+</html>
