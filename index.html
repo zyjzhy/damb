@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生档案模板生成器(不累加)</title>
+    <title>学生档案模板生成器(优化版)</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <style>
@@ -301,10 +301,21 @@
         
         .file-pages {
             padding-left: 10px;
-            color: #27ae60;
             font-weight: bold;
-            min-width: 60px;
+            min-width: 80px;
             text-align: right;
+        }
+        
+        .file-pages.success {
+            color: var(--success-color);
+        }
+        
+        .file-pages.warning {
+            color: var(--warning-color);
+        }
+        
+        .file-pages.error {
+            color: var(--error-color);
         }
         
         .progress-container {
@@ -447,6 +458,23 @@
             margin-top: 20px;
         }
         
+        .unmatched-list {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #f39c12;
+            border-radius: 5px;
+            background: #fef9e7;
+            font-size: 13px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .unmatched-item {
+            padding: 3px 0;
+            color: #e74c3c;
+            font-weight: 500;
+        }
+        
         @media (max-width: 768px) {
             .data-input-section {
                 flex-direction: column;
@@ -474,7 +502,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>学生档案模板生成器</h1>
+            <h1>学生档案模板生成器（优化版）</h1>
             <p>输入学生信息，自动生成档案模板Excel文件</p>
         </header>
         
@@ -518,12 +546,14 @@
             <section class="config-section">
                 <h2>文件上传</h2>
                 <div class="instructions">
-                    <h4>文件上传说明：</h4>
+                    <h4>文件上传说明（优化后）：</h4>
                     <ul>
                         <li>每个文件类型支持上传多个PDF文件</li>
-                        <li>文件名格式应为：学号_姓名_论文题目 或 姓名_论文题目</li>
-                        <li>系统会自动解析文件名获取学生姓名</li>
+                        <li>文件名格式应为：学号_姓名_论文题目 或 姓名_论文题目 或 姓名 论文题目</li>
+                        <li>系统会智能解析文件名获取学生姓名</li>
                         <li>解析失败的文件将<strong class="error-file">标记为红色</strong></li>
+                        <li>页数为0的文件将<strong class="file-warning">标记为橙色</strong></li>
+                        <li>未匹配到学生姓名的文件会显示在下方列表中</li>
                     </ul>
                 </div>
                 
@@ -536,6 +566,7 @@
                             <input type="file" class="file-input" data-type="thesis" accept=".pdf" multiple style="display: none;">
                         </div>
                         <div class="file-list" id="file-list-thesis"></div>
+                        <div class="unmatched-list" id="unmatched-list-thesis">未匹配的文件将显示在这里</div>
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-thesis"></div>
                         </div>
@@ -549,6 +580,10 @@
                                 <div class="stat-title">失败</div>
                                 <div class="stat-value stat-error" id="error-thesis">0</div>
                             </div>
+                            <div class="stat-card">
+                                <div class="stat-title">页数0</div>
+                                <div class="stat-value stat-warning" id="warning-thesis">0</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -560,6 +595,7 @@
                             <input type="file" class="file-input" data-type="trainingPlan" accept=".pdf" multiple style="display: none;">
                         </div>
                         <div class="file-list" id="file-list-trainingPlan"></div>
+                        <div class="unmatched-list" id="unmatched-list-trainingPlan">未匹配的文件将显示在这里</div>
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-trainingPlan"></div>
                         </div>
@@ -573,6 +609,10 @@
                                 <div class="stat-title">失败</div>
                                 <div class="stat-value stat-error" id="error-trainingPlan">0</div>
                             </div>
+                            <div class="stat-card">
+                                <div class="stat-title">页数0</div>
+                                <div class="stat-value stat-warning" id="warning-trainingPlan">0</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -584,6 +624,7 @@
                             <input type="file" class="file-input" data-type="proposal" accept=".pdf" multiple style="display: none;">
                         </div>
                         <div class="file-list" id="file-list-proposal"></div>
+                        <div class="unmatched-list" id="unmatched-list-proposal">未匹配的文件将显示在这里</div>
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-proposal"></div>
                         </div>
@@ -597,6 +638,10 @@
                                 <div class="stat-title">失败</div>
                                 <div class="stat-value stat-error" id="error-proposal">0</div>
                             </div>
+                            <div class="stat-card">
+                                <div class="stat-title">页数0</div>
+                                <div class="stat-value stat-warning" id="warning-proposal">0</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -608,6 +653,7 @@
                             <input type="file" class="file-input" data-type="defenseApplication" accept=".pdf" multiple style="display: none;">
                         </div>
                         <div class="file-list" id="file-list-defenseApplication"></div>
+                        <div class="unmatched-list" id="unmatched-list-defenseApplication">未匹配的文件将显示在这里</div>
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-defenseApplication"></div>
                         </div>
@@ -621,6 +667,10 @@
                                 <div class="stat-title">失败</div>
                                 <div class="stat-value stat-error" id="error-defenseApplication">0</div>
                             </div>
+                            <div class="stat-card">
+                                <div class="stat-title">页数0</div>
+                                <div class="stat-value stat-warning" id="warning-defenseApplication">0</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -632,6 +682,7 @@
                             <input type="file" class="file-input" data-type="degreeApplication" accept=".pdf" multiple style="display: none;">
                         </div>
                         <div class="file-list" id="file-list-degreeApplication"></div>
+                        <div class="unmatched-list" id="unmatched-list-degreeApplication">未匹配的文件将显示在这里</div>
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-degreeApplication"></div>
                         </div>
@@ -645,6 +696,10 @@
                                 <div class="stat-title">失败</div>
                                 <div class="stat-value stat-error" id="error-degreeApplication">0</div>
                             </div>
+                            <div class="stat-card">
+                                <div class="stat-title">页数0</div>
+                                <div class="stat-value stat-warning" id="warning-degreeApplication">0</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -656,6 +711,7 @@
                             <input type="file" class="file-input" data-type="graduationForm" accept=".pdf" multiple style="display: none;">
                         </div>
                         <div class="file-list" id="file-list-graduationForm"></div>
+                        <div class="unmatched-list" id="unmatched-list-graduationForm">未匹配的文件将显示在这里</div>
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-graduationForm"></div>
                         </div>
@@ -669,6 +725,10 @@
                                 <div class="stat-title">失败</div>
                                 <div class="stat-value stat-error" id="error-graduationForm">0</div>
                             </div>
+                            <div class="stat-card">
+                                <div class="stat-title">页数0</div>
+                                <div class="stat-value stat-warning" id="warning-graduationForm">0</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -680,6 +740,7 @@
                             <input type="file" class="file-input" data-type="defenseSituation" accept=".pdf" multiple style="display: none;">
                         </div>
                         <div class="file-list" id="file-list-defenseSituation"></div>
+                        <div class="unmatched-list" id="unmatched-list-defenseSituation">未匹配的文件将显示在这里</div>
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-defenseSituation"></div>
                         </div>
@@ -693,6 +754,10 @@
                                 <div class="stat-title">失败</div>
                                 <div class="stat-value stat-error" id="error-defenseSituation">0</div>
                             </div>
+                            <div class="stat-card">
+                                <div class="stat-title">页数0</div>
+                                <div class="stat-value stat-warning" id="warning-defenseSituation">0</div>
+                            </div>
                         </div>
                     </div>
                     
@@ -704,6 +769,7 @@
                             <input type="file" class="file-input" data-type="supervisorReview" accept=".pdf" multiple style="display: none;">
                         </div>
                         <div class="file-list" id="file-list-supervisorReview"></div>
+                        <div class="unmatched-list" id="unmatched-list-supervisorReview">未匹配的文件将显示在这里</div>
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-supervisorReview"></div>
                         </div>
@@ -716,6 +782,10 @@
                             <div class="stat-card">
                                 <div class="stat-title">失败</div>
                                 <div class="stat-value stat-error" id="error-supervisorReview">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">页数0</div>
+                                <div class="stat-value stat-warning" id="warning-supervisorReview">0</div>
                             </div>
                         </div>
                     </div>
@@ -802,6 +872,18 @@
                 supervisorReview: {}
             };
             
+            // 存储未匹配的文件
+            const unmatchedFiles = {
+                thesis: [],
+                trainingPlan: [],
+                proposal: [],
+                defenseApplication: [],
+                degreeApplication: [],
+                graduationForm: [],
+                defenseSituation: [],
+                supervisorReview: []
+            };
+            
             // 更新状态
             function updateStatus() {
                 const names = getNames();
@@ -877,6 +959,13 @@
                     filesInfo[type] = {};
                 }
                 
+                // 重置未匹配文件
+                for (const type in unmatchedFiles) {
+                    unmatchedFiles[type] = [];
+                    const unmatchedList = document.getElementById(`unmatched-list-${type}`);
+                    unmatchedList.innerHTML = "未匹配的文件将显示在这里";
+                }
+                
                 // 重置UI状态
                 document.querySelectorAll('.file-list').forEach(el => el.innerHTML = '');
                 document.querySelectorAll('.file-status').forEach(el => el.textContent = '等待上传文件...');
@@ -886,45 +975,48 @@
                 updateStatus();
             }
             
-            // 从文件名解析学生姓名
-            function parseStudentName(fileName) {
+            // 增强版：从文件名解析学生姓名
+            function parseStudentName(fileName, studentNames) {
+                // 移除文件扩展名
+                const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+                
                 // 支持的分隔符
-                const separators = ['_', '-', '+'];
-                let name = null;
+                const separators = ['_', '-', '+', ' ', '：', ':'];
                 
-                // 尝试格式1: "学号_姓名_论文题目"
+                // 尝试各种分隔符分割文件名
                 for (const sep of separators) {
-                    if (fileName.includes(sep)) {
-                        const parts = fileName.split(sep);
-                        if (parts.length >= 3) {
-                            name = parts[1].trim();
-                            break;
+                    const parts = nameWithoutExt.split(sep);
+                    for (const part of parts) {
+                        // 检查部分是否在学生姓名列表中
+                        if (studentNames.includes(part.trim())) {
+                            return part.trim();
                         }
                     }
                 }
                 
-                // 尝试格式2: "姓名_论文题目"
-                if (!name) {
-                    for (const sep of separators) {
-                        if (fileName.includes(sep)) {
-                            const parts = fileName.split(sep);
-                            if (parts.length >= 2) {
-                                name = parts[0].trim();
-                                break;
-                            }
+                // 尝试匹配整个文件名（不含扩展名）
+                if (studentNames.includes(nameWithoutExt.trim())) {
+                    return nameWithoutExt.trim();
+                }
+                
+                // 尝试匹配文件名中的中文姓名（2-4个字符）
+                const chineseNamePattern = /[\u4e00-\u9fa5]{2,4}/g;
+                const matches = nameWithoutExt.match(chineseNamePattern);
+                if (matches) {
+                    for (const match of matches) {
+                        if (studentNames.includes(match)) {
+                            return match;
                         }
                     }
                 }
                 
-                // 尝试按空格分割
-                if (!name) {
-                    const spaceParts = fileName.split(/\s+/);
-                    if (spaceParts.length >= 2) {
-                        name = spaceParts[0].trim();
-                    }
+                // 最后尝试：移除所有非中文字符
+                const cleanedName = nameWithoutExt.replace(/[^\u4e00-\u9fa5]/g, '');
+                if (studentNames.includes(cleanedName)) {
+                    return cleanedName;
                 }
                 
-                return name;
+                return null;
             }
             
             // 获取PDF文件页数
@@ -945,10 +1037,12 @@
                 const type = btn.dataset.type;
                 const fileInput = document.querySelector(`.file-input[data-type="${type}"]`);
                 const fileList = document.getElementById(`file-list-${type}`);
+                const unmatchedList = document.getElementById(`unmatched-list-${type}`);
                 const progressBar = document.getElementById(`progress-bar-${type}`);
                 const fileStatus = document.getElementById(`file-status-${type}`);
                 const successCount = document.getElementById(`success-${type}`);
                 const errorCount = document.getElementById(`error-${type}`);
+                const warningCount = document.getElementById(`warning-${type}`);
                 
                 // 点击按钮触发文件选择
                 btn.addEventListener('click', () => fileInput.click());
@@ -961,22 +1055,31 @@
                     let processed = 0;
                     let success = 0;
                     let error = 0;
+                    let warning = 0;
                     
                     // 重置状态
                     filesInfo[type] = {};
+                    unmatchedFiles[type] = [];
                     fileList.innerHTML = '';
+                    unmatchedList.innerHTML = '';
                     fileStatus.textContent = `开始处理 ${files.length} 个文件...`;
                     progressBar.style.width = '0%';
                     successCount.textContent = '0';
                     errorCount.textContent = '0';
+                    warningCount.textContent = '0';
+                    
+                    // 获取当前学生姓名列表
+                    const studentNames = getNames();
                     
                     for (const file of files) {
                         try {
                             const fileName = file.name;
-                            const studentName = parseStudentName(fileName);
+                            const studentName = parseStudentName(fileName, studentNames);
                             
                             if (!studentName) {
-                                throw new Error('无法解析学生姓名');
+                                // 添加到未匹配列表
+                                unmatchedFiles[type].push(fileName);
+                                throw new Error('无法匹配学生姓名');
                             }
                             
                             // 获取PDF页数
@@ -988,9 +1091,18 @@
                             // 添加到文件列表
                             const fileItem = document.createElement('div');
                             fileItem.className = 'file-item';
+                            
+                            // 根据页数设置不同样式
+                            let pageClass = 'success';
+                            if (numPages === 0) {
+                                pageClass = 'warning';
+                                warning++;
+                                warningCount.textContent = warning;
+                            }
+                            
                             fileItem.innerHTML = `
                                 <div class="file-name">${fileName}</div>
-                                <div class="file-pages file-success">${numPages}页</div>
+                                <div class="file-pages ${pageClass}">${numPages}页</div>
                             `;
                             fileList.appendChild(fileItem);
                             
@@ -1004,7 +1116,7 @@
                             fileItem.className = 'file-item error-file';
                             fileItem.innerHTML = `
                                 <div class="file-name">${file.name}</div>
-                                <div class="file-pages file-error">解析失败</div>
+                                <div class="file-pages error">${err.message}</div>
                             `;
                             fileList.appendChild(fileItem);
                             
@@ -1019,8 +1131,23 @@
                         fileStatus.textContent = `已处理 ${processed}/${files.length} 个文件`;
                     }
                     
+                    // 显示未匹配的文件
+                    if (unmatchedFiles[type].length > 0) {
+                        unmatchedList.innerHTML = '<div class="unmatched-item">未匹配的文件：</div>';
+                        unmatchedFiles[type].forEach(fileName => {
+                            const item = document.createElement('div');
+                            item.className = 'unmatched-item';
+                            item.textContent = fileName;
+                            unmatchedList.appendChild(item);
+                        });
+                    } else {
+                        unmatchedList.innerHTML = '所有文件均匹配成功';
+                    }
+                    
                     // 更新状态显示
-                    fileStatus.innerHTML = `解析完成！<span class="file-success">成功: ${success} 个</span>, <span class="file-error">失败: ${error} 个</span>`;
+                    fileStatus.innerHTML = `解析完成！<span class="file-success">成功: ${success} 个</span>, 
+                    <span class="file-error">失败: ${error} 个</span>, 
+                    <span class="file-warning">页数0: ${warning} 个</span>`;
                 });
             });
             
