@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生档案模板生成器</title>
+    <title>学生档案模板生成器(不累加)</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <style>
         :root {
             --primary-color: #3498db;
@@ -106,16 +107,19 @@
         }
         
         .input-group input, 
-        .input-group select {
+        .input-group select,
+        .input-group button {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid var(--border-color);
             border-radius: 5px;
             font-size: 14px;
+            background: white;
         }
         
         .input-group input:focus, 
-        .input-group select:focus {
+        .input-group select:focus,
+        .input-group button:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
@@ -244,6 +248,15 @@
             transform: none;
         }
         
+        .btn-file {
+            background: #9b59b6;
+            color: white;
+        }
+        
+        .btn-file:hover {
+            background: #8e44ad;
+        }
+        
         .divider {
             height: 30px;
             width: 1px;
@@ -260,6 +273,180 @@
             margin-top: 20px;
         }
         
+        .file-list {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background: white;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        .file-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding-right: 10px;
+        }
+        
+        .file-pages {
+            padding-left: 10px;
+            color: #27ae60;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+        }
+        
+        .progress-container {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .file-status {
+            margin-top: 10px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+        
+        .error-file {
+            color: var(--error-color);
+            background-color: #fef0f0;
+            border-radius: 4px;
+            padding: 3px 8px;
+        }
+        
+        .file-error {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+        
+        .file-success {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .file-warning {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+        
+        .stats-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 10px 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-width: 180px;
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .stat-success {
+            color: var(--success-color);
+        }
+        
+        .stat-warning {
+            color: var(--warning-color);
+        }
+        
+        .stat-error {
+            color: var(--error-color);
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .instructions h4 {
+            margin-bottom: 8px;
+            color: #1565c0;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .file-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .badge-pdf {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .file-upload-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .file-upload-section h3 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--header-bg);
+        }
+        
+        .file-upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
         @media (max-width: 768px) {
             .data-input-section {
                 flex-direction: column;
@@ -272,6 +459,14 @@
             
             .button-group {
                 flex-direction: column;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+            }
+            
+            .file-upload-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -305,17 +500,227 @@
                 </div>
             </section>
             
-            <div class="data-input-section">
-                <div class="data-column">
-                    <h3>学生姓名列表</h3>
-                    <textarea id="names" placeholder="每行输入一个学生姓名&#10;例如：&#10;张三&#10;李四&#10;王五"></textarea>
+            <section class="config-section">
+                <h2>学生信息</h2>
+                <div class="data-input-section">
+                    <div class="data-column">
+                        <h3>学生姓名列表</h3>
+                        <textarea id="names" placeholder="每行输入一个学生姓名&#10;例如：&#10;张三&#10;李四&#10;王五"></textarea>
+                    </div>
+                    
+                    <div class="data-column">
+                        <h3>论文题目列表</h3>
+                        <textarea id="topics" placeholder="每行输入一个论文题目&#10;例如：&#10;人工智能在教育领域的应用研究&#10;区块链技术在金融安全中的实践分析&#10;量子计算对密码学的影响评估"></textarea>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="config-section">
+                <h2>文件上传</h2>
+                <div class="instructions">
+                    <h4>文件上传说明：</h4>
+                    <ul>
+                        <li>每个文件类型支持上传多个PDF文件</li>
+                        <li>文件名格式应为：学号_姓名_论文题目 或 姓名_论文题目</li>
+                        <li>系统会自动解析文件名获取学生姓名</li>
+                        <li>解析失败的文件将<strong class="error-file">标记为红色</strong></li>
+                    </ul>
                 </div>
                 
-                <div class="data-column">
-                    <h3>论文题目列表</h3>
-                    <textarea id="topics" placeholder="每行输入一个论文题目&#10;例如：&#10;人工智能在教育领域的应用研究&#10;区块链技术在金融安全中的实践分析&#10;量子计算对密码学的影响评估"></textarea>
+                <div class="file-upload-grid">
+                    <!-- 论文 -->
+                    <div class="file-upload-section">
+                        <h3>论文文件</h3>
+                        <div class="input-group">
+                            <button class="btn btn-file upload-btn" data-type="thesis">📄 上传论文文件</button>
+                            <input type="file" class="file-input" data-type="thesis" accept=".pdf" multiple style="display: none;">
+                        </div>
+                        <div class="file-list" id="file-list-thesis"></div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-thesis"></div>
+                        </div>
+                        <div class="file-status" id="file-status-thesis">等待上传文件...</div>
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">成功</div>
+                                <div class="stat-value stat-success" id="success-thesis">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">失败</div>
+                                <div class="stat-value stat-error" id="error-thesis">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 培养计划 -->
+                    <div class="file-upload-section">
+                        <h3>培养计划</h3>
+                        <div class="input-group">
+                            <button class="btn btn-file upload-btn" data-type="trainingPlan">📄 上传培养计划</button>
+                            <input type="file" class="file-input" data-type="trainingPlan" accept=".pdf" multiple style="display: none;">
+                        </div>
+                        <div class="file-list" id="file-list-trainingPlan"></div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-trainingPlan"></div>
+                        </div>
+                        <div class="file-status" id="file-status-trainingPlan">等待上传文件...</div>
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">成功</div>
+                                <div class="stat-value stat-success" id="success-trainingPlan">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">失败</div>
+                                <div class="stat-value stat-error" id="error-trainingPlan">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 开题报告 -->
+                    <div class="file-upload-section">
+                        <h3>开题报告</h3>
+                        <div class="input-group">
+                            <button class="btn btn-file upload-btn" data-type="proposal">📄 上传开题报告</button>
+                            <input type="file" class="file-input" data-type="proposal" accept=".pdf" multiple style="display: none;">
+                        </div>
+                        <div class="file-list" id="file-list-proposal"></div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-proposal"></div>
+                        </div>
+                        <div class="file-status" id="file-status-proposal">等待上传文件...</div>
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">成功</div>
+                                <div class="stat-value stat-success" id="success-proposal">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">失败</div>
+                                <div class="stat-value stat-error" id="error-proposal">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 论文答辩申请材料 -->
+                    <div class="file-upload-section">
+                        <h3>论文答辩申请材料</h3>
+                        <div class="input-group">
+                            <button class="btn btn-file upload-btn" data-type="defenseApplication">📄 上传申请材料</button>
+                            <input type="file" class="file-input" data-type="defenseApplication" accept=".pdf" multiple style="display: none;">
+                        </div>
+                        <div class="file-list" id="file-list-defenseApplication"></div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-defenseApplication"></div>
+                        </div>
+                        <div class="file-status" id="file-status-defenseApplication">等待上传文件...</div>
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">成功</div>
+                                <div class="stat-value stat-success" id="success-defenseApplication">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">失败</div>
+                                <div class="stat-value stat-error" id="error-defenseApplication">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 学位申请书 -->
+                    <div class="file-upload-section">
+                        <h3>学位申请书</h3>
+                        <div class="input-group">
+                            <button class="btn btn-file upload-btn" data-type="degreeApplication">📄 上传学位申请书</button>
+                            <input type="file" class="file-input" data-type="degreeApplication" accept=".pdf" multiple style="display: none;">
+                        </div>
+                        <div class="file-list" id="file-list-degreeApplication"></div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-degreeApplication"></div>
+                        </div>
+                        <div class="file-status" id="file-status-degreeApplication">等待上传文件...</div>
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">成功</div>
+                                <div class="stat-value stat-success" id="success-degreeApplication">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">失败</div>
+                                <div class="stat-value stat-error" id="error-degreeApplication">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 毕业登记表 -->
+                    <div class="file-upload-section">
+                        <h3>毕业登记表</h3>
+                        <div class="input-group">
+                            <button class="btn btn-file upload-btn" data-type="graduationForm">📄 上传毕业登记表</button>
+                            <input type="file" class="file-input" data-type="graduationForm" accept=".pdf" multiple style="display: none;">
+                        </div>
+                        <div class="file-list" id="file-list-graduationForm"></div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-graduationForm"></div>
+                        </div>
+                        <div class="file-status" id="file-status-graduationForm">等待上传文件...</div>
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">成功</div>
+                                <div class="stat-value stat-success" id="success-graduationForm">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">失败</div>
+                                <div class="stat-value stat-error" id="error-graduationForm">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 学位论文答辩情况表 -->
+                    <div class="file-upload-section">
+                        <h3>学位论文答辩情况表</h3>
+                        <div class="input-group">
+                            <button class="btn btn-file upload-btn" data-type="defenseSituation">📄 上传答辩情况表</button>
+                            <input type="file" class="file-input" data-type="defenseSituation" accept=".pdf" multiple style="display: none;">
+                        </div>
+                        <div class="file-list" id="file-list-defenseSituation"></div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-defenseSituation"></div>
+                        </div>
+                        <div class="file-status" id="file-status-defenseSituation">等待上传文件...</div>
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">成功</div>
+                                <div class="stat-value stat-success" id="success-defenseSituation">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">失败</div>
+                                <div class="stat-value stat-error" id="error-defenseSituation">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 指导教师评阅书 -->
+                    <div class="file-upload-section">
+                        <h3>指导教师评阅书</h3>
+                        <div class="input-group">
+                            <button class="btn btn-file upload-btn" data-type="supervisorReview">📄 上传评阅书</button>
+                            <input type="file" class="file-input" data-type="supervisorReview" accept=".pdf" multiple style="display: none;">
+                        </div>
+                        <div class="file-list" id="file-list-supervisorReview"></div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-supervisorReview"></div>
+                        </div>
+                        <div class="file-status" id="file-status-supervisorReview">等待上传文件...</div>
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">成功</div>
+                                <div class="stat-value stat-success" id="success-supervisorReview">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">失败</div>
+                                <div class="stat-value stat-error" id="error-supervisorReview">0</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
             
             <div class="status-bar">
                 <div id="status" class="status-message">
@@ -344,6 +749,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 设置PDF.js worker
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+            
             // 获取DOM元素
             const yearInput = document.getElementById('year');
             const degreeSelect = document.getElementById('degree');
@@ -354,14 +762,45 @@
             const generateBtn = document.getElementById('generate-btn');
             const clearBtn = document.getElementById('clear-btn');
             
-            // 固定标题列表
+            // 固定标题列表（16个文件）
             const fixedTitles = [
                 "注册卡片", "培养计划", "开题报告", "开题报告评议结果", 
                 "论文答辩申请材料", "学位申请书", "毕业登记表", 
                 "学位论文答辩情况表", "学位评定委员会决议", 
-                "颁发学位证明书", "指导老师评阅书", "论文评阅书1", 
-                "论文评阅书2", "表决票", "答辩记录", "成绩单"
+                "颁发学位证明书", "指导教师评阅书", "论文评阅书", 
+                "表决票", "答辩记录", "成绩单"
             ];
+            
+            // 固定页数映射
+            const fixedPages = {
+                "注册卡片": 2,
+                "培养计划": 11,
+                "开题报告": 0,
+                "开题报告评议结果": 1,
+                "论文答辩申请材料": 10,
+                "学位申请书": 4,
+                "毕业登记表": 8,
+                "学位论文答辩情况表": 3,
+                "学位评定委员会决议": 1,
+                "颁发学位证明书": 1,
+                "指导教师评阅书": 4,
+                "论文评阅书": 10,
+                "表决票": 5,
+                "答辩记录": 1,
+                "成绩单": 1
+            };
+            
+            // 存储文件信息（按类型）
+            const filesInfo = {
+                thesis: {},
+                trainingPlan: {},
+                proposal: {},
+                defenseApplication: {},
+                degreeApplication: {},
+                graduationForm: {},
+                defenseSituation: {},
+                supervisorReview: {}
+            };
             
             // 更新状态
             function updateStatus() {
@@ -432,7 +871,173 @@
             function clearContent() {
                 namesTextarea.value = '';
                 topicsTextarea.value = '';
+                
+                // 重置所有文件类型
+                for (const type in filesInfo) {
+                    filesInfo[type] = {};
+                }
+                
+                // 重置UI状态
+                document.querySelectorAll('.file-list').forEach(el => el.innerHTML = '');
+                document.querySelectorAll('.file-status').forEach(el => el.textContent = '等待上传文件...');
+                document.querySelectorAll('.progress-bar').forEach(el => el.style.width = '0%');
+                document.querySelectorAll('.stat-value').forEach(el => el.textContent = '0');
+                
                 updateStatus();
+            }
+            
+            // 从文件名解析学生姓名
+            function parseStudentName(fileName) {
+                // 支持的分隔符
+                const separators = ['_', '-', '+'];
+                let name = null;
+                
+                // 尝试格式1: "学号_姓名_论文题目"
+                for (const sep of separators) {
+                    if (fileName.includes(sep)) {
+                        const parts = fileName.split(sep);
+                        if (parts.length >= 3) {
+                            name = parts[1].trim();
+                            break;
+                        }
+                    }
+                }
+                
+                // 尝试格式2: "姓名_论文题目"
+                if (!name) {
+                    for (const sep of separators) {
+                        if (fileName.includes(sep)) {
+                            const parts = fileName.split(sep);
+                            if (parts.length >= 2) {
+                                name = parts[0].trim();
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // 尝试按空格分割
+                if (!name) {
+                    const spaceParts = fileName.split(/\s+/);
+                    if (spaceParts.length >= 2) {
+                        name = spaceParts[0].trim();
+                    }
+                }
+                
+                return name;
+            }
+            
+            // 获取PDF文件页数
+            async function getPdfPages(file) {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const typedArray = new Uint8Array(arrayBuffer);
+                    const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                    return pdf.numPages;
+                } catch (error) {
+                    console.error(`解析PDF页数失败: ${file.name}`, error);
+                    return 0;
+                }
+            }
+            
+            // 为每个上传按钮绑定事件
+            document.querySelectorAll('.upload-btn').forEach(btn => {
+                const type = btn.dataset.type;
+                const fileInput = document.querySelector(`.file-input[data-type="${type}"]`);
+                const fileList = document.getElementById(`file-list-${type}`);
+                const progressBar = document.getElementById(`progress-bar-${type}`);
+                const fileStatus = document.getElementById(`file-status-${type}`);
+                const successCount = document.getElementById(`success-${type}`);
+                const errorCount = document.getElementById(`error-${type}`);
+                
+                // 点击按钮触发文件选择
+                btn.addEventListener('click', () => fileInput.click());
+                
+                // 文件选择处理
+                fileInput.addEventListener('change', async function(e) {
+                    const files = Array.from(e.target.files);
+                    if (files.length === 0) return;
+                    
+                    let processed = 0;
+                    let success = 0;
+                    let error = 0;
+                    
+                    // 重置状态
+                    filesInfo[type] = {};
+                    fileList.innerHTML = '';
+                    fileStatus.textContent = `开始处理 ${files.length} 个文件...`;
+                    progressBar.style.width = '0%';
+                    successCount.textContent = '0';
+                    errorCount.textContent = '0';
+                    
+                    for (const file of files) {
+                        try {
+                            const fileName = file.name;
+                            const studentName = parseStudentName(fileName);
+                            
+                            if (!studentName) {
+                                throw new Error('无法解析学生姓名');
+                            }
+                            
+                            // 获取PDF页数
+                            const numPages = await getPdfPages(file);
+                            
+                            // 存储文件信息
+                            filesInfo[type][studentName] = numPages;
+                            
+                            // 添加到文件列表
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item';
+                            fileItem.innerHTML = `
+                                <div class="file-name">${fileName}</div>
+                                <div class="file-pages file-success">${numPages}页</div>
+                            `;
+                            fileList.appendChild(fileItem);
+                            
+                            success++;
+                            successCount.textContent = success;
+                            
+                        } catch (err) {
+                            console.error(`处理文件 ${file.name} 出错:`, err);
+                            
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item error-file';
+                            fileItem.innerHTML = `
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-pages file-error">解析失败</div>
+                            `;
+                            fileList.appendChild(fileItem);
+                            
+                            error++;
+                            errorCount.textContent = error;
+                        }
+                        
+                        // 更新进度
+                        processed++;
+                        const progress = Math.round((processed / files.length) * 100);
+                        progressBar.style.width = `${progress}%`;
+                        fileStatus.textContent = `已处理 ${processed}/${files.length} 个文件`;
+                    }
+                    
+                    // 更新状态显示
+                    fileStatus.innerHTML = `解析完成！<span class="file-success">成功: ${success} 个</span>, <span class="file-error">失败: ${error} 个</span>`;
+                });
+            });
+            
+            // 获取指定类型的页数
+            function getPageForType(name, type, title) {
+                // 优先使用上传的文件页数
+                if (filesInfo[type] && filesInfo[type][name] !== undefined) {
+                    return filesInfo[type][name];
+                }
+                
+                // 其次使用固定页数
+                if (fixedPages[title] !== undefined) {
+                    return fixedPages[title];
+                }
+                
+                // 默认返回0
+                return 0;
             }
             
             // 生成Excel模板
@@ -474,8 +1079,8 @@
                         const name = names[i];
                         const topic = topics[i];
                         
-                        // 每个学生18条记录
-                        for (let j = 0; j < 18; j++) {
+                        // 每个学生16条记录（1-16号文件）
+                        for (let j = 0; j < 17; j++) {
                             const row = Array(31).fill(null);
                             
                             // 设置固定值
@@ -484,13 +1089,51 @@
                             row[6] = j === 0 ? null : j;  // 馆编件号
                             row[12] = name;  // 责任者
                             
-                            // 设置正题名
+                            // 设置正题名和页数
                             if (j === 0) {
                                 row[9] = `${name}${degree}生档案`;
+                                row[14] = ""; // 档案总页数设为0
                             } else if (j === 1) {
                                 row[9] = topic;
+                                // 获取论文页数
+                                row[14] = getPageForType(name, 'thesis', '论文评阅书');
                             } else {
-                                row[9] = `${name}${fixedTitles[j-2]}`;
+                                const titleIndex = j - 2;
+                                if (titleIndex < fixedTitles.length) {
+                                    const title = fixedTitles[titleIndex];
+                                    row[9] = `${name}${title}`;
+                                    
+                                    // 根据文件类型获取页数
+                                    let pageCount = 0;
+                                    
+                                    switch(title) {
+                                        case "培养计划":
+                                            pageCount = getPageForType(name, 'trainingPlan', title);
+                                            break;
+                                        case "开题报告":
+                                            pageCount = getPageForType(name, 'proposal', title);
+                                            break;
+                                        case "论文答辩申请材料":
+                                            pageCount = getPageForType(name, 'defenseApplication', title);
+                                            break;
+                                        case "学位申请书":
+                                            pageCount = getPageForType(name, 'degreeApplication', title);
+                                            break;
+                                        case "毕业登记表":
+                                            pageCount = getPageForType(name, 'graduationForm', title);
+                                            break;
+                                        case "学位论文答辩情况表":
+                                            pageCount = getPageForType(name, 'defenseSituation', title);
+                                            break;
+                                        case "指导教师评阅书":
+                                            pageCount = getPageForType(name, 'supervisorReview', title);
+                                            break;
+                                        default:
+                                            pageCount = fixedPages[title] || 0;
+                                    }
+                                    
+                                    row[14] = pageCount;
+                                }
                             }
                             
                             studentData.push(row);
