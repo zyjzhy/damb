@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生档案模板生成器(不累加)</title>
+    <title>学生档案模板生成器(优化版)</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <style>
@@ -361,44 +361,6 @@
             font-weight: bold;
         }
         
-        .stats-container {
-            display: flex;
-            gap: 15px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 8px;
-            padding: 10px 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            min-width: 180px;
-        }
-        
-        .stat-title {
-            font-size: 14px;
-            color: #6c757d;
-            margin-bottom: 5px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        .stat-success {
-            color: var(--success-color);
-        }
-        
-        .stat-warning {
-            color: var(--warning-color);
-        }
-        
-        .stat-error {
-            color: var(--error-color);
-        }
-        
         .instructions {
             background: #e3f2fd;
             border-left: 4px solid var(--primary-color);
@@ -419,20 +381,6 @@
         
         .instructions li {
             margin-bottom: 5px;
-        }
-        
-        .file-type-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-right: 8px;
-        }
-        
-        .badge-pdf {
-            background-color: #e74c3c;
-            color: white;
         }
         
         .file-upload-section {
@@ -458,21 +406,190 @@
             margin-top: 20px;
         }
         
-        .unmatched-list {
+        .unmatched-list, .missing-list {
             margin-top: 10px;
             padding: 10px;
-            border: 1px solid #f39c12;
             border-radius: 5px;
-            background: #fef9e7;
             font-size: 13px;
             max-height: 120px;
             overflow-y: auto;
         }
         
-        .unmatched-item {
+        .unmatched-list {
+            border: 1px solid #f39c12;
+            background: #fef9e7;
+        }
+        
+        .missing-list {
+            border: 1px solid #e74c3c;
+            background: #fef0f0;
+        }
+        
+        .unmatched-item, .missing-item {
             padding: 3px 0;
-            color: #e74c3c;
             font-weight: 500;
+        }
+        
+        .unmatched-item {
+            color: #e74c3c;
+        }
+        
+        .missing-item {
+            color: #c0392b;
+        }
+        
+        .summary-title {
+            font-weight: bold;
+            margin-top: 15px;
+            color: #2c3e50;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .file-type-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .file-type-summary h3 {
+            margin-bottom: 15px;
+            color: var(--header-bg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-type-summary h3::before {
+            content: "📊";
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            transition: transform 0.2s;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .summary-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 8px;
+        }
+        
+        .summary-icon {
+            font-size: 20px;
+        }
+        
+        .summary-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        
+        .summary-stats div {
+            text-align: center;
+        }
+        
+        .summary-stats span {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 3px;
+        }
+        
+        .summary-success {
+            color: var(--success-color);
+        }
+        
+        .summary-warning {
+            color: var(--warning-color);
+        }
+        
+        .summary-error {
+            color: var(--error-color);
+        }
+        
+        .missing-title {
+            font-weight: bold;
+            margin-top: 10px;
+            color: #e74c3c;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .missing-title::before {
+            content: "⚠";
+        }
+        
+        /* 紧凑统计样式 */
+        .compact-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 70px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 3px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .stat-success .stat-value {
+            color: var(--success-color);
+        }
+        
+        .stat-warning .stat-value {
+            color: var(--warning-color);
+        }
+        
+        .stat-error .stat-value {
+            color: var(--error-color);
+        }
+        
+        .stat-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
         }
         
         @media (max-width: 768px) {
@@ -495,6 +612,19 @@
             
             .file-upload-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .compact-stats {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .stat-item {
+                min-width: 60px;
             }
         }
     </style>
@@ -554,6 +684,7 @@
                         <li>解析失败的文件将<strong class="error-file">标记为红色</strong></li>
                         <li>页数为0的文件将<strong class="file-warning">标记为橙色</strong></li>
                         <li>未匹配到学生姓名的文件会显示在下方列表中</li>
+                        <li>未上传文件的学生姓名会显示在<strong class="error-file">缺失名单</strong>中</li>
                     </ul>
                 </div>
                 
@@ -567,24 +698,37 @@
                         </div>
                         <div class="file-list" id="file-list-thesis"></div>
                         <div class="unmatched-list" id="unmatched-list-thesis">未匹配的文件将显示在这里</div>
+                        <div class="missing-title">缺失学生名单：</div>
+                        <div class="missing-list" id="missing-list-thesis">未发现缺失学生</div>
+                        
+                        <!-- 紧凑统计区域 -->
+                        <div class="compact-stats">
+                            <div class="stat-item stat-success">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-thesis">0</div>
+                            </div>
+                            <div class="stat-item stat-error">
+                                <div class="stat-icon">✗</div>
+                                <div class="stat-label">失败</div>
+                                <div class="stat-value" id="error-thesis">0</div>
+                            </div>
+                            <div class="stat-item stat-warning">
+                                <div class="stat-icon">⚠</div>
+                                <div class="stat-label">页数0</div>
+                                <div class="stat-value" id="warning-thesis">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">👤</div>
+                                <div class="stat-label">缺失</div>
+                                <div class="stat-value" id="missing-thesis">0</div>
+                            </div>
+                        </div>
+                        
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-thesis"></div>
                         </div>
                         <div class="file-status" id="file-status-thesis">等待上传文件...</div>
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <div class="stat-title">成功</div>
-                                <div class="stat-value stat-success" id="success-thesis">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">失败</div>
-                                <div class="stat-value stat-error" id="error-thesis">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">页数0</div>
-                                <div class="stat-value stat-warning" id="warning-thesis">0</div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- 培养计划 -->
@@ -596,24 +740,37 @@
                         </div>
                         <div class="file-list" id="file-list-trainingPlan"></div>
                         <div class="unmatched-list" id="unmatched-list-trainingPlan">未匹配的文件将显示在这里</div>
+                        <div class="missing-title">缺失学生名单：</div>
+                        <div class="missing-list" id="missing-list-trainingPlan">未发现缺失学生</div>
+                        
+                        <!-- 紧凑统计区域 -->
+                        <div class="compact-stats">
+                            <div class="stat-item stat-success">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-trainingPlan">0</div>
+                            </div>
+                            <div class="stat-item stat-error">
+                                <div class="stat-icon">✗</div>
+                                <div class="stat-label">失败</div>
+                                <div class="stat-value" id="error-trainingPlan">0</div>
+                            </div>
+                            <div class="stat-item stat-warning">
+                                <div class="stat-icon">⚠</div>
+                                <div class="stat-label">页数0</div>
+                                <div class="stat-value" id="warning-trainingPlan">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">👤</div>
+                                <div class="stat-label">缺失</div>
+                                <div class="stat-value" id="missing-trainingPlan">0</div>
+                            </div>
+                        </div>
+                        
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-trainingPlan"></div>
                         </div>
                         <div class="file-status" id="file-status-trainingPlan">等待上传文件...</div>
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <div class="stat-title">成功</div>
-                                <div class="stat-value stat-success" id="success-trainingPlan">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">失败</div>
-                                <div class="stat-value stat-error" id="error-trainingPlan">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">页数0</div>
-                                <div class="stat-value stat-warning" id="warning-trainingPlan">0</div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- 开题报告 -->
@@ -625,24 +782,37 @@
                         </div>
                         <div class="file-list" id="file-list-proposal"></div>
                         <div class="unmatched-list" id="unmatched-list-proposal">未匹配的文件将显示在这里</div>
+                        <div class="missing-title">缺失学生名单：</div>
+                        <div class="missing-list" id="missing-list-proposal">未发现缺失学生</div>
+                        
+                        <!-- 紧凑统计区域 -->
+                        <div class="compact-stats">
+                            <div class="stat-item stat-success">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-proposal">0</div>
+                            </div>
+                            <div class="stat-item stat-error">
+                                <div class="stat-icon">✗</div>
+                                <div class="stat-label">失败</div>
+                                <div class="stat-value" id="error-proposal">0</div>
+                            </div>
+                            <div class="stat-item stat-warning">
+                                <div class="stat-icon">⚠</div>
+                                <div class="stat-label">页数0</div>
+                                <div class="stat-value" id="warning-proposal">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">👤</div>
+                                <div class="stat-label">缺失</div>
+                                <div class="stat-value" id="missing-proposal">0</div>
+                            </div>
+                        </div>
+                        
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-proposal"></div>
                         </div>
                         <div class="file-status" id="file-status-proposal">等待上传文件...</div>
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <div class="stat-title">成功</div>
-                                <div class="stat-value stat-success" id="success-proposal">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">失败</div>
-                                <div class="stat-value stat-error" id="error-proposal">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">页数0</div>
-                                <div class="stat-value stat-warning" id="warning-proposal">0</div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- 论文答辩申请材料 -->
@@ -654,24 +824,37 @@
                         </div>
                         <div class="file-list" id="file-list-defenseApplication"></div>
                         <div class="unmatched-list" id="unmatched-list-defenseApplication">未匹配的文件将显示在这里</div>
+                        <div class="missing-title">缺失学生名单：</div>
+                        <div class="missing-list" id="missing-list-defenseApplication">未发现缺失学生</div>
+                        
+                        <!-- 紧凑统计区域 -->
+                        <div class="compact-stats">
+                            <div class="stat-item stat-success">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-defenseApplication">0</div>
+                            </div>
+                            <div class="stat-item stat-error">
+                                <div class="stat-icon">✗</div>
+                                <div class="stat-label">失败</div>
+                                <div class="stat-value" id="error-defenseApplication">0</div>
+                            </div>
+                            <div class="stat-item stat-warning">
+                                <div class="stat-icon">⚠</div>
+                                <div class="stat-label">页数0</div>
+                                <div class="stat-value" id="warning-defenseApplication">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">👤</div>
+                                <div class="stat-label">缺失</div>
+                                <div class="stat-value" id="missing-defenseApplication">0</div>
+                            </div>
+                        </div>
+                        
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-defenseApplication"></div>
                         </div>
                         <div class="file-status" id="file-status-defenseApplication">等待上传文件...</div>
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <div class="stat-title">成功</div>
-                                <div class="stat-value stat-success" id="success-defenseApplication">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">失败</div>
-                                <div class="stat-value stat-error" id="error-defenseApplication">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">页数0</div>
-                                <div class="stat-value stat-warning" id="warning-defenseApplication">0</div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- 学位申请书 -->
@@ -683,24 +866,37 @@
                         </div>
                         <div class="file-list" id="file-list-degreeApplication"></div>
                         <div class="unmatched-list" id="unmatched-list-degreeApplication">未匹配的文件将显示在这里</div>
+                        <div class="missing-title">缺失学生名单：</div>
+                        <div class="missing-list" id="missing-list-degreeApplication">未发现缺失学生</div>
+                        
+                        <!-- 紧凑统计区域 -->
+                        <div class="compact-stats">
+                            <div class="stat-item stat-success">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-degreeApplication">0</div>
+                            </div>
+                            <div class="stat-item stat-error">
+                                <div class="stat-icon">✗</div>
+                                <div class="stat-label">失败</div>
+                                <div class="stat-value" id="error-degreeApplication">0</div>
+                            </div>
+                            <div class="stat-item stat-warning">
+                                <div class="stat-icon">⚠</div>
+                                <div class="stat-label">页数0</div>
+                                <div class="stat-value" id="warning-degreeApplication">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">👤</div>
+                                <div class="stat-label">缺失</div>
+                                <div class="stat-value" id="missing-degreeApplication">0</div>
+                            </div>
+                        </div>
+                        
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-degreeApplication"></div>
                         </div>
                         <div class="file-status" id="file-status-degreeApplication">等待上传文件...</div>
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <div class="stat-title">成功</div>
-                                <div class="stat-value stat-success" id="success-degreeApplication">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">失败</div>
-                                <div class="stat-value stat-error" id="error-degreeApplication">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">页数0</div>
-                                <div class="stat-value stat-warning" id="warning-degreeApplication">0</div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- 毕业登记表 -->
@@ -712,24 +908,37 @@
                         </div>
                         <div class="file-list" id="file-list-graduationForm"></div>
                         <div class="unmatched-list" id="unmatched-list-graduationForm">未匹配的文件将显示在这里</div>
+                        <div class="missing-title">缺失学生名单：</div>
+                        <div class="missing-list" id="missing-list-graduationForm">未发现缺失学生</div>
+                        
+                        <!-- 紧凑统计区域 -->
+                        <div class="compact-stats">
+                            <div class="stat-item stat-success">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-graduationForm">0</div>
+                            </div>
+                            <div class="stat-item stat-error">
+                                <div class="stat-icon">✗</div>
+                                <div class="stat-label">失败</div>
+                                <div class="stat-value" id="error-graduationForm">0</div>
+                            </div>
+                            <div class="stat-item stat-warning">
+                                <div class="stat-icon">⚠</div>
+                                <div class="stat-label">页数0</div>
+                                <div class="stat-value" id="warning-graduationForm">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">👤</div>
+                                <div class="stat-label">缺失</div>
+                                <div class="stat-value" id="missing-graduationForm">0</div>
+                            </div>
+                        </div>
+                        
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-graduationForm"></div>
                         </div>
                         <div class="file-status" id="file-status-graduationForm">等待上传文件...</div>
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <div class="stat-title">成功</div>
-                                <div class="stat-value stat-success" id="success-graduationForm">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">失败</div>
-                                <div class="stat-value stat-error" id="error-graduationForm">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">页数0</div>
-                                <div class="stat-value stat-warning" id="warning-graduationForm">0</div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- 学位论文答辩情况表 -->
@@ -741,24 +950,37 @@
                         </div>
                         <div class="file-list" id="file-list-defenseSituation"></div>
                         <div class="unmatched-list" id="unmatched-list-defenseSituation">未匹配的文件将显示在这里</div>
+                        <div class="missing-title">缺失学生名单：</div>
+                        <div class="missing-list" id="missing-list-defenseSituation">未发现缺失学生</div>
+                        
+                        <!-- 紧凑统计区域 -->
+                        <div class="compact-stats">
+                            <div class="stat-item stat-success">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-defenseSituation">0</div>
+                            </div>
+                            <div class="stat-item stat-error">
+                                <div class="stat-icon">✗</div>
+                                <div class="stat-label">失败</div>
+                                <div class="stat-value" id="error-defenseSituation">0</div>
+                            </div>
+                            <div class="stat-item stat-warning">
+                                <div class="stat-icon">⚠</div>
+                                <div class="stat-label">页数0</div>
+                                <div class="stat-value" id="warning-defenseSituation">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">👤</div>
+                                <div class="stat-label">缺失</div>
+                                <div class="stat-value" id="missing-defenseSituation">0</div>
+                            </div>
+                        </div>
+                        
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-defenseSituation"></div>
                         </div>
                         <div class="file-status" id="file-status-defenseSituation">等待上传文件...</div>
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <div class="stat-title">成功</div>
-                                <div class="stat-value stat-success" id="success-defenseSituation">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">失败</div>
-                                <div class="stat-value stat-error" id="error-defenseSituation">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">页数0</div>
-                                <div class="stat-value stat-warning" id="warning-defenseSituation">0</div>
-                            </div>
-                        </div>
                     </div>
                     
                     <!-- 指导教师评阅书 -->
@@ -770,24 +992,37 @@
                         </div>
                         <div class="file-list" id="file-list-supervisorReview"></div>
                         <div class="unmatched-list" id="unmatched-list-supervisorReview">未匹配的文件将显示在这里</div>
+                        <div class="missing-title">缺失学生名单：</div>
+                        <div class="missing-list" id="missing-list-supervisorReview">未发现缺失学生</div>
+                        
+                        <!-- 紧凑统计区域 -->
+                        <div class="compact-stats">
+                            <div class="stat-item stat-success">
+                                <div class="stat-icon">✓</div>
+                                <div class="stat-label">成功</div>
+                                <div class="stat-value" id="success-supervisorReview">0</div>
+                            </div>
+                            <div class="stat-item stat-error">
+                                <div class="stat-icon">✗</div>
+                                <div class="stat-label">失败</div>
+                                <div class="stat-value" id="error-supervisorReview">0</div>
+                            </div>
+                            <div class="stat-item stat-warning">
+                                <div class="stat-icon">⚠</div>
+                                <div class="stat-label">页数0</div>
+                                <div class="stat-value" id="warning-supervisorReview">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-icon">👤</div>
+                                <div class="stat-label">缺失</div>
+                                <div class="stat-value" id="missing-supervisorReview">0</div>
+                            </div>
+                        </div>
+                        
                         <div class="progress-container">
                             <div class="progress-bar" id="progress-bar-supervisorReview"></div>
                         </div>
                         <div class="file-status" id="file-status-supervisorReview">等待上传文件...</div>
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <div class="stat-title">成功</div>
-                                <div class="stat-value stat-success" id="success-supervisorReview">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">失败</div>
-                                <div class="stat-value stat-error" id="error-supervisorReview">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">页数0</div>
-                                <div class="stat-value stat-warning" id="warning-supervisorReview">0</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -832,6 +1067,18 @@
             const generateBtn = document.getElementById('generate-btn');
             const clearBtn = document.getElementById('clear-btn');
             
+            // 文件类型配置
+            const fileTypes = [
+                { id: 'thesis', name: '论文文件', icon: '📄' },
+                { id: 'trainingPlan', name: '培养计划', icon: '📋' },
+                { id: 'proposal', name: '开题报告', icon: '📝' },
+                { id: 'defenseApplication', name: '论文答辩申请材料', icon: '📑' },
+                { id: 'degreeApplication', name: '学位申请书', icon: '📄' },
+                { id: 'graduationForm', name: '毕业登记表', icon: '📋' },
+                { id: 'defenseSituation', name: '学位论文答辩情况表', icon: '📊' },
+                { id: 'supervisorReview', name: '指导教师评阅书', icon: '✍️' }
+            ];
+            
             // 固定标题列表（16个文件）
             const fixedTitles = [
                 "注册卡片", "培养计划", "开题报告", "开题报告评议结果", 
@@ -861,28 +1108,16 @@
             };
             
             // 存储文件信息（按类型）
-            const filesInfo = {
-                thesis: {},
-                trainingPlan: {},
-                proposal: {},
-                defenseApplication: {},
-                degreeApplication: {},
-                graduationForm: {},
-                defenseSituation: {},
-                supervisorReview: {}
-            };
+            const filesInfo = {};
             
             // 存储未匹配的文件
-            const unmatchedFiles = {
-                thesis: [],
-                trainingPlan: [],
-                proposal: [],
-                defenseApplication: [],
-                degreeApplication: [],
-                graduationForm: [],
-                defenseSituation: [],
-                supervisorReview: []
-            };
+            const unmatchedFiles = {};
+            
+            // 初始化文件信息对象
+            fileTypes.forEach(type => {
+                filesInfo[type.id] = {};
+                unmatchedFiles[type.id] = [];
+            });
             
             // 更新状态
             function updateStatus() {
@@ -955,16 +1190,15 @@
                 topicsTextarea.value = '';
                 
                 // 重置所有文件类型
-                for (const type in filesInfo) {
-                    filesInfo[type] = {};
-                }
-                
-                // 重置未匹配文件
-                for (const type in unmatchedFiles) {
-                    unmatchedFiles[type] = [];
-                    const unmatchedList = document.getElementById(`unmatched-list-${type}`);
+                fileTypes.forEach(type => {
+                    filesInfo[type.id] = {};
+                    unmatchedFiles[type.id] = [];
+                    
+                    const unmatchedList = document.getElementById(`unmatched-list-${type.id}`);
+                    const missingList = document.getElementById(`missing-list-${type.id}`);
                     unmatchedList.innerHTML = "未匹配的文件将显示在这里";
-                }
+                    missingList.innerHTML = "未发现缺失学生";
+                });
                 
                 // 重置UI状态
                 document.querySelectorAll('.file-list').forEach(el => el.innerHTML = '');
@@ -1038,11 +1272,13 @@
                 const fileInput = document.querySelector(`.file-input[data-type="${type}"]`);
                 const fileList = document.getElementById(`file-list-${type}`);
                 const unmatchedList = document.getElementById(`unmatched-list-${type}`);
+                const missingList = document.getElementById(`missing-list-${type}`);
                 const progressBar = document.getElementById(`progress-bar-${type}`);
                 const fileStatus = document.getElementById(`file-status-${type}`);
                 const successCount = document.getElementById(`success-${type}`);
                 const errorCount = document.getElementById(`error-${type}`);
                 const warningCount = document.getElementById(`warning-${type}`);
+                const missingCount = document.getElementById(`missing-${type}`);
                 
                 // 点击按钮触发文件选择
                 btn.addEventListener('click', () => fileInput.click());
@@ -1062,6 +1298,7 @@
                     unmatchedFiles[type] = [];
                     fileList.innerHTML = '';
                     unmatchedList.innerHTML = '';
+                    missingList.innerHTML = '';
                     fileStatus.textContent = `开始处理 ${files.length} 个文件...`;
                     progressBar.style.width = '0%';
                     successCount.textContent = '0';
@@ -1144,10 +1381,32 @@
                         unmatchedList.innerHTML = '所有文件均匹配成功';
                     }
                     
+                    // 显示缺失的学生名单
+                    const uploadedNames = Object.keys(filesInfo[type]);
+                    const missingNames = studentNames.filter(name => !uploadedNames.includes(name));
+                    
+                    if (missingNames.length > 0) {
+                        missingList.innerHTML = '<div class="missing-item">缺失的学生：</div>';
+                        missingNames.forEach(name => {
+                            const item = document.createElement('div');
+                            item.className = 'missing-item';
+                            item.textContent = name;
+                            missingList.appendChild(item);
+                        });
+                    } else {
+                        missingList.innerHTML = '未发现缺失学生';
+                    }
+                    
+                    // 更新缺失学生计数
+                    missingCount.textContent = missingNames.length;
+                    
                     // 更新状态显示
                     fileStatus.innerHTML = `解析完成！<span class="file-success">成功: ${success} 个</span>, 
                     <span class="file-error">失败: ${error} 个</span>, 
                     <span class="file-warning">页数0: ${warning} 个</span>`;
+                    
+                    // 更新全局状态
+                    updateStatus();
                 });
             });
             
@@ -1322,4 +1581,3 @@
     </script>
 </body>
 </html>
-
