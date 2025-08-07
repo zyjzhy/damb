@@ -14,7 +14,7 @@
             --error-color: #e74c3c;
             --light-bg: #f8f9fa;
             --border-color: #dee2e6;
-            --header-bg: #2c3e50;
+            --header-bg: #40b7de;
             --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
@@ -486,6 +486,16 @@
             font-size: 20px;
             margin-bottom: 5px;
         }
+
+        .stat-success .stat-icon {
+            color: var(--success-color);
+        }
+        .stat-error .stat-icon {
+            color: var(--error-color);
+        }
+        .stat-warning .stat-icon {
+            color: var(--warning-color);
+        }
         
         .date-group {
             min-width: 180px;
@@ -521,6 +531,41 @@
             .divider {
                 display: none;
             }
+        }
+        
+        .page-count-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .page-count-input input {
+            width: 80px;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .page-count-input .info-icon {
+            color: #3498db;
+            font-size: 16px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .page-count-input .info-icon:hover::after {
+            content: "论文尾页页码（不含封面、目录等）";
+            position: absolute;
+            top: -30px;
+            left: 20px;
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -558,7 +603,7 @@
                         <input type="date" id="date">
                         <div class="input-hint">选择日期</div>
                     </div>
-                </div> 
+                </div>
             </section>
             
             <section class="config-section">
@@ -573,11 +618,21 @@
                         <h3>论文题目列表</h3>
                         <textarea id="topics" placeholder="每行输入一个论文题目&#10;例如：&#10;人工智能在教育领域的应用研究&#10;区块链技术在金融安全中的实践分析&#10;量子计算对密码学的影响评估"></textarea>
                     </div>
+                    
+                    <!-- 新增的论文页数输入框 -->
+                    <div class="data-column">
+                        <h3>论文页数列表</h3>
+                        <textarea id="pages" placeholder="每行输入一个论文页数&#10;例如：&#10;45&#10;60&#10;52"></textarea>
+                        <div class="page-count-input">
+                            <span>论文页数:</span>
+                            <span class="info-icon">ℹ️ <a href="https://zyj.lanzouw.com/iVnyn32wfs3e" target="_blank" rel="noopener noreferrer">论文尾页页码识别工具</a> </span>
+                        </div>
+                    </div>
                 </div>
             </section>
             
             <section class="config-section">
-                <h2>文件上传</h2>
+                <h2>其他文件上传</h2>
                 <div class="instructions">
                     <h4>文件上传说明：</h4>
                     <ul>
@@ -592,48 +647,6 @@
                 </div>
                 
                 <div class="file-upload-grid">
-                    <!-- 论文 -->
-                    <div class="file-upload-section">
-                        <h3>论文文件</h3>
-                        <div class="input-group">
-                            <button class="btn btn-file upload-btn" data-type="thesis">📄 上传论文文件</button>
-                            <input type="file" class="file-input" data-type="thesis" accept=".pdf" multiple style="display: none;">
-                        </div>
-                        <div class="file-list" id="file-list-thesis"></div>
-                        <div class="unmatched-list" id="unmatched-list-thesis">未匹配的文件将显示在这里</div>
-                        <div class="missing-title">缺失学生名单：</div>
-                        <div class="missing-list" id="missing-list-thesis">未发现缺失学生</div>
-                        
-                        <!-- 紧凑统计区域 -->
-                        <div class="compact-stats">
-                            <div class="stat-item stat-success">
-                                <div class="stat-icon">✓</div>
-                                <div class="stat-label">成功</div>
-                                <div class="stat-value" id="success-thesis">0</div>
-                            </div>
-                            <div class="stat-item stat-error">
-                                <div class="stat-icon">✗</div>
-                                <div class="stat-label">失败</div>
-                                <div class="stat-value" id="error-thesis">0</div>
-                            </div>
-                            <div class="stat-item stat-warning">
-                                <div class="stat-icon">⚠</div>
-                                <div class="stat-label">页数0</div>
-                                <div class="stat-value" id="warning-thesis">0</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-icon">👤</div>
-                                <div class="stat-label">缺失</div>
-                                <div class="stat-value" id="missing-thesis">0</div>
-                            </div>
-                        </div>
-                        
-                        <div class="progress-container">
-                            <div class="progress-bar" id="progress-bar-thesis"></div>
-                        </div>
-                        <div class="file-status" id="file-status-thesis">等待上传文件...</div>
-                    </div>
-                    
                     <!-- 培养计划 -->
                     <div class="file-upload-section">
                         <h3>培养计划</h3>
@@ -649,7 +662,7 @@
                         <!-- 紧凑统计区域 -->
                         <div class="compact-stats">
                             <div class="stat-item stat-success">
-                                <div class="stat-icon">✓</div>
+                                <div class="stat-icon">✔</div>
                                 <div class="stat-label">成功</div>
                                 <div class="stat-value" id="success-trainingPlan">0</div>
                             </div>
@@ -691,7 +704,7 @@
                         <!-- 紧凑统计区域 -->
                         <div class="compact-stats">
                             <div class="stat-item stat-success">
-                                <div class="stat-icon">✓</div>
+                                <div class="stat-icon">✔</div>
                                 <div class="stat-label">成功</div>
                                 <div class="stat-value" id="success-proposal">0</div>
                             </div>
@@ -733,7 +746,7 @@
                         <!-- 紧凑统计区域 -->
                         <div class="compact-stats">
                             <div class="stat-item stat-success">
-                                <div class="stat-icon">✓</div>
+                                <div class="stat-icon">✔</div>
                                 <div class="stat-label">成功</div>
                                 <div class="stat-value" id="success-defenseApplication">0</div>
                             </div>
@@ -775,7 +788,7 @@
                         <!-- 紧凑统计区域 -->
                         <div class="compact-stats">
                             <div class="stat-item stat-success">
-                                <div class="stat-icon">✓</div>
+                                <div class="stat-icon">✔</div>
                                 <div class="stat-label">成功</div>
                                 <div class="stat-value" id="success-degreeApplication">0</div>
                             </div>
@@ -817,7 +830,7 @@
                         <!-- 紧凑统计区域 -->
                         <div class="compact-stats">
                             <div class="stat-item stat-success">
-                                <div class="stat-icon">✓</div>
+                                <div class="stat-icon">✔</div>
                                 <div class="stat-label">成功</div>
                                 <div class="stat-value" id="success-graduationForm">0</div>
                             </div>
@@ -859,7 +872,7 @@
                         <!-- 紧凑统计区域 -->
                         <div class="compact-stats">
                             <div class="stat-item stat-success">
-                                <div class="stat-icon">✓</div>
+                                <div class="stat-icon">✔</div>
                                 <div class="stat-label">成功</div>
                                 <div class="stat-value" id="success-defenseSituation">0</div>
                             </div>
@@ -901,7 +914,7 @@
                         <!-- 紧凑统计区域 -->
                         <div class="compact-stats">
                             <div class="stat-item stat-success">
-                                <div class="stat-icon">✓</div>
+                                <div class="stat-icon" style="color: green;">√</div>
                                 <div class="stat-label">成功</div>
                                 <div class="stat-value" id="success-supervisorReview">0</div>
                             </div>
@@ -933,10 +946,10 @@
             <div class="status-bar">
                 <div id="status" class="status-message">
                     <span class="status-icon">ⓘ</span>
-                    <span>请输入学生姓名和论文题目</span>
+                    <span>请输入学生姓名、论文题目和论文页数</span>
                 </div>
                 <div>
-                    <span id="count-display">姓名: 0 | 题目: 0</span>
+                    <span id="count-display">姓名: 0 | 题目: 0 | 页数: 0</span>
                 </div>
             </div>
             
@@ -951,7 +964,7 @@
         </div>
         
         <div class="footer">
-            <p>提示：请确保学生姓名和论文题目的数量一致</p>
+            <p>提示：请确保学生姓名、论文题目和论文页数三者的数量一致</p>
         </div>
     </div>
 
@@ -966,14 +979,14 @@
             const dateInput = document.getElementById('date');
             const namesTextarea = document.getElementById('names');
             const topicsTextarea = document.getElementById('topics');
+            const pagesTextarea = document.getElementById('pages'); // 新增的页数输入框
             const statusDisplay = document.getElementById('status');
             const countDisplay = document.getElementById('count-display');
             const generateBtn = document.getElementById('generate-btn');
             const clearBtn = document.getElementById('clear-btn');
             
-            // 文件类型配置
+            // 文件类型配置（移除了论文文件类型）
             const fileTypes = [
-                { id: 'thesis', name: '论文文件', icon: '📄' },
                 { id: 'trainingPlan', name: '培养计划', icon: '📋' },
                 { id: 'proposal', name: '开题报告', icon: '📝' },
                 { id: 'defenseApplication', name: '论文答辩申请材料', icon: '📑' },
@@ -1041,25 +1054,34 @@
                 return `${year}.${month}.${day}`;
             }
             
+            // 获取页数列表
+            function getPages() {
+                return pagesTextarea.value.split('\n')
+                    .map(page => page.trim())
+                    .filter(page => page !== '');
+            }
+            
             // 更新状态
             function updateStatus() {
                 const names = getNames();
                 const topics = getTopics();
+                const pages = getPages();
                 const namesCount = names.length;
                 const topicsCount = topics.length;
+                const pagesCount = pages.length;
                 
                 // 更新计数显示
-                countDisplay.textContent = `姓名: ${namesCount} | 题目: ${topicsCount}`;
+                countDisplay.textContent = `姓名: ${namesCount} | 题目: ${topicsCount} | 页数: ${pagesCount}`;
                 
                 // 更新状态消息
-                if (namesCount === 0 && topicsCount === 0) {
-                    setStatus("请输入学生姓名和论文题目", "info");
+                if (namesCount === 0 && topicsCount === 0 && pagesCount === 0) {
+                    setStatus("请输入学生姓名、论文题目和论文页数", "info");
                     generateBtn.disabled = true;
-                } else if (namesCount !== topicsCount) {
-                    setStatus(`数据不匹配: 姓名(${namesCount}) ≠ 题目(${topicsCount})`, "error");
+                } else if (namesCount !== topicsCount || namesCount !== pagesCount || topicsCount !== pagesCount) {
+                    setStatus(`数据不匹配: 姓名(${namesCount}) ≠ 题目(${topicsCount}) 或 姓名(${namesCount}) ≠ 页数(${pagesCount})`, "error");
                     generateBtn.disabled = true;
                 } else {
-                    setStatus(`数据匹配: 姓名(${namesCount}) = 题目(${topicsCount})`, "success");
+                    setStatus(`数据匹配: 姓名(${namesCount}) = 题目(${topicsCount}) = 页数(${pagesCount})`, "success");
                     generateBtn.disabled = false;
                 }
             }
@@ -1085,7 +1107,7 @@
             // 获取状态图标
             function getStatusIcon(type) {
                 switch(type) {
-                    case "success": return "✓";
+                    case "success": return "✔";
                     case "error": return "⚠";
                     case "warning": return "⚠";
                     default: return "ⓘ";
@@ -1110,6 +1132,7 @@
             function clearContent() {
                 namesTextarea.value = '';
                 topicsTextarea.value = '';
+                pagesTextarea.value = '';
                 
                 // 重置所有文件类型
                 fileTypes.forEach(type => {
@@ -1359,6 +1382,7 @@
                 try {
                     const names = getNames();
                     const topics = getTopics();
+                    const pages = getPages().map(page => parseInt(page) || 0); // 转换为数字
                     const year = yearInput.value;
                     const degree = degreeSelect.value;
                     const dateValue = dateInput.value;
@@ -1367,6 +1391,12 @@
                     // 验证年份
                     if (!/^\d{4}$/.test(year)) {
                         setStatus("错误: 年份必须是4位数字", "error");
+                        return;
+                    }
+                    
+                    // 验证三者数量是否一致
+                    if (names.length !== topics.length || names.length !== pages.length) {
+                        setStatus("错误: 姓名、论文题目和论文页数数量不一致", "error");
                         return;
                     }
                     
@@ -1396,29 +1426,29 @@
                     for (let i = 0; i < names.length; i++) {
                         const name = names[i];
                         const topic = topics[i];
+                        const pageCount = pages[i]; // 使用用户输入的论文页数
                         
-                        // 每个学生16条记录（1-16号文件）
-                        for (let j = 0; j < 17; j++) {
+                        // 用于存储该学生的所有行（17行）
+                        const studentRows = [];
+                        let totalPages = 0; // 用于累计该学生的所有文件页数
+                        
+                        // 先生成16个文件行（j从1到16）
+                        for (let j = 1; j <= 16; j++) {
                             const row = Array(31).fill(null);
                             
                             // 设置固定值
                             row[4] = year;  // 实体分类号
                             row[5] = caseNumber;  // 案卷/盒号
-                            
-                            // 设置馆编件号
-                            const fileNumber = j === 0 ? null : j;
-                            row[6] = fileNumber;  // 馆编件号
-                            
+                            row[6] = j;  // 馆编件号
                             row[12] = name;  // 责任者
+                            row[7] = "永久";  // 保管期设置为永久
                             
                             // 设置正题名和页数
-                            if (j === 0) {
-                                row[9] = `${name}${degree}生档案`;
-                                row[14] = ""; // 档案总页数设为0
-                            } else if (j === 1) {
+                            if (j === 1) {
+                                // 第一个文件是论文
                                 row[9] = topic;
-                                // 获取论文页数
-                                row[14] = getPageForType(name, 'thesis', '论文评阅书');
+                                row[14] = pageCount;
+                                totalPages += pageCount;
                             } else {
                                 const titleIndex = j - 2;
                                 if (titleIndex < fixedTitles.length) {
@@ -1455,19 +1485,32 @@
                                     }
                                     
                                     row[14] = pageCount;
+                                    totalPages += pageCount;
                                 }
                             }
                             
-                            // 如果不是第一行（档案总览）
-                            if (j !== 0) {
-                                // 文号 = 馆编件号
-                                row[24] = fileNumber;
-                                // 时间列使用选择的日期
-                                row[16] = formattedDate;
-                            }
+                            // 设置文号和时间
+                            row[24] = j;   // 文号 = 馆编件号
+                            row[16] = formattedDate;
                             
-                            studentData.push(row);
+                            studentRows.push(row);
                         }
+                        
+                        // 生成总览行（第0行）
+                        const overviewRow = Array(31).fill(null);
+                        overviewRow[4] = year;  // 实体分类号
+                        overviewRow[5] = caseNumber;  // 案卷/盒号
+                        overviewRow[6] = null;   // 馆编件号设为空
+                        overviewRow[12] = name;  // 责任者
+                        overviewRow[9] = `${name}${degree}生档案`;
+                        overviewRow[14] = totalPages; // 总页数为16个文件的页数总和
+                        overviewRow[7] = "永久";  // 保管期设置为永久
+                        
+                        // 将总览行插入到该学生数据的最前面
+                        studentRows.unshift(overviewRow);
+                        
+                        // 添加到学生数据
+                        studentData.push(...studentRows);
                         
                         caseNumber++;
                     }
@@ -1516,6 +1559,7 @@
             // 绑定事件
             namesTextarea.addEventListener('input', updateStatus);
             topicsTextarea.addEventListener('input', updateStatus);
+            pagesTextarea.addEventListener('input', updateStatus); // 新增的页数输入框事件
             generateBtn.addEventListener('click', generateTemplate);
             clearBtn.addEventListener('click', clearContent);
             
