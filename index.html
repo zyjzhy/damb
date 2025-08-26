@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生档案模板生成器(不累加)</title>
+    <title>学生档案模板生成器</title>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
     <style>
@@ -572,8 +572,10 @@
 <body>
     <div class="container">
         <header>
-            <h1>学生档案模板生成器（不累加）</h1>
+            <h1>学生档案模板生成器</h1>
             <p>输入学生信息，自动生成档案模板Excel文件</p>
+            <p>注意：生成的模板“椰树”列内容是单独文件的页数</p>
+            <p>正确的应是每个的累计页数，如1号文件对应的页数为1，(假设1号文件总页数为10)，则2号文件的页数应是11</p>
         </header>
         
         <div class="main-content">
